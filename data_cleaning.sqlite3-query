@@ -1,0 +1,141 @@
+-- database: ./kickstarter.db
+
+-- database: /workspaces/KickStarter-Pledge-Analysis/kickstarter.db
+
+-- Use the ▷ button in the top right corner to run the entire file.
+
+
+-- SELECT DISTINCT outcome
+-- FROM Campaign;
+
+-- SELECT *
+-- FROM campaign
+-- WHERE outcome = 'successful' 
+-- AND pledged < goal;
+
+-- SELECT COUNT(*) AS 'Failed Campaigns'
+-- FROM (
+--     SELECT *
+--     FROM campaign
+--     WHERE outcome = 'failed'
+--     AND pledged < goal
+-- );
+
+-- SELECT *
+-- FROM campaign
+-- WHERE outcome = 'failed'
+-- AND pledged > goal;
+
+-- SELECT *
+-- FROM campaign
+-- WHERE outcome = 'live'
+-- AND pledged > goal;
+
+-- SELECT COUNT(*)
+-- FROM Campaign
+-- WHERE outcome = "live";
+
+-- SELECT * FROM Campaign WHERE outcome = "live" AND pledged >= goal;
+
+
+-- creating a new view
+-- CREATE VIEW Campaign_da AS
+-- SELECT id, name, sub_category_id, country_id, currency_id, launched, deadline, goal, pledged, backers,
+--     CASE 
+--         WHEN pledged >= goal THEN 'Successful'
+--         ELSE 'Unsuccessful'
+--     END AS outcome
+-- FROM campaign
+-- WHERE NOT outcome = 'live';
+
+
+
+
+-- SELECT cu.id AS currency_id, cu.name AS currency, COUNT(DISTINCT co.id) AS country_count
+-- FROM Currency cu
+-- LEFT JOIN Country co ON co.id IN (
+--     SELECT country_id FROM Campaign_da WHERE currency_id = cu.id
+-- )
+-- GROUP BY cu.id, cu.name;
+-- -- HAVING COUNT(DISTINCT co.id) > 1;
+
+
+
+-- SELECT * 
+-- FROM Campaign_da
+-- WHERE country_id = (SELECT id FROM Country WHERE name = 'N,0');
+
+
+-- UPDATE Country
+-- SET name = 'Unknown'
+-- WHERE name = 'N,0';
+
+-- SELECT c.*, co.name as country_name
+-- FROM Campaign_da c
+-- JOIN Country co ON c.country_id = co.id
+-- WHERE co.name = 'Unknown';
+
+
+-- CREATE TABLE ExchangeRate (
+--     id INTEGER PRIMARY KEY,
+--     name TEXT,
+--     to_usd REAL
+-- );
+
+-- INSERT INTO ExchangeRate (id, name, to_usd) VALUES
+-- (1, 'GBP', 1.2620),
+-- (2, 'USD', 1.0000),
+-- (3, 'CAD', 0.7136),
+-- (4, 'AUD', 0.6501),
+-- (5, 'NOK', 0.0904),
+-- (6, 'EUR', 1.0543),
+-- (7, 'MXN', 0.0491),
+-- (8, 'SEK', 0.0915),
+-- (9, 'NZD', 0.5906),
+-- (10, 'CHF', 1.1336),
+-- (11, 'DKK', 0.1416),
+-- (12, 'HKD', 0.1285),
+-- (13, 'SGD', 0.7449),
+-- (14, 'JPY', 0.0067);
+
+
+-- CREATE VIEW Flat_Campaign AS
+-- SELECT
+--     c.id AS campaign_id,
+--     c.name AS campaign_name,
+--     sc.name AS sub_category,
+--     cat.name AS category,
+--     co.name AS country,
+--     cu.name AS currency,
+--     c.launched,
+--     c.deadline,
+--     c.goal,
+--     c.pledged,
+--     c.backers,
+--     c.outcome
+-- FROM Campaign_da c
+-- LEFT JOIN Sub_category sc ON c.sub_category_id = sc.id
+-- LEFT JOIN Category cat ON sc.category_id = cat.id
+-- LEFT JOIN Country co ON c.country_id = co.id
+-- LEFT JOIN Currency cu ON c.currency_id = cu.id;
+
+
+-- CREATE VIEW Flat_Campaign AS
+-- SELECT
+--     c.id AS campaign_id,
+--     c.name AS campaign_name,
+--     sc.name AS sub_category,
+--     cat.name AS category,
+--     co.name AS country,
+--     c.launched,
+--     c.deadline,
+--     ROUND(c.goal * er.to_usd, 2) AS goal_usd,
+--     ROUND(c.pledged * er.to_usd, 2) AS pledged_usd,
+--     c.backers,
+--     c.outcome
+-- FROM Campaign_da c
+-- LEFT JOIN Sub_category sc ON c.sub_category_id = sc.id
+-- LEFT JOIN Category cat ON sc.category_id = cat.id
+-- LEFT JOIN Country co ON c.country_id = co.id
+-- LEFT JOIN Currency cu ON c.currency_id = cu.id
+-- LEFT JOIN ExchangeRate er ON cu.name = er.name;
