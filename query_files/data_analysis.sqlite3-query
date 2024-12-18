@@ -1,0 +1,78 @@
+-- database: ../kickstarter.db
+
+
+-- SELECT 
+--     COUNT(*) AS total_campaigns,
+--     AVG(goal_usd) AS avg_goal_usd,
+--     AVG(pledged_usd) AS avg_pledged_usd,
+--     AVG(backers) AS avg_backers,
+--     MIN(pledged_usd) AS min_pledged_usd,
+--     MAX(pledged_usd) AS max_pledged_usd,
+--     SUM(pledged_usd) AS total_pledged
+-- FROM Flat_Campaign;
+
+---- Top 3 Campaigns by Pledged Amount
+-- SELECT 
+--     campaign_name, 
+--     pledged_usd 
+-- FROM Flat_Campaign
+-- ORDER BY pledged_usd DESC
+-- LIMIT 3;
+
+
+-- ---- Funding Goal Analysis
+-- SELECT 
+--     outcome, 
+--     AVG(goal_usd) AS avg_goal_usd, 
+--     COUNT(*) AS campaign_count 
+-- FROM Flat_Campaign
+-- GROUP BY outcome;
+
+---- Top 3 Countries by Campaign Count
+-- SELECT 
+--     country, 
+--     COUNT(*) AS campaign_count
+-- FROM Flat_Campaign
+-- WHERE outcome = 'Unsuccessful'
+-- GROUP BY country
+-- ORDER BY campaign_count DESC
+-- LIMIT 3;
+
+
+-- SELECT 
+--     SUM(pledged_usd) / SUM(backers) AS avg_pledge_per_backer 
+-- FROM Flat_Campaign
+-- WHERE outcome = 'Successful' AND backers > 0;
+
+
+-- WITH ordered_goals AS (
+--   SELECT
+--     outcome,
+--     goal_usd,
+--     ROW_NUMBER() OVER (PARTITION BY outcome ORDER BY goal_usd) AS rn,
+--     COUNT(*) OVER (PARTITION BY outcome) AS cnt
+--   FROM
+--     flat_campaign
+-- )
+-- SELECT
+--   outcome,
+--   AVG(goal_usd) AS median_goal
+-- FROM
+--   ordered_goals
+-- WHERE
+--   rn IN ((cnt + 1) / 2, (cnt + 2) / 2)
+-- GROUP BY
+--   outcome
+-- ORDER BY
+--   outcome;
+
+
+-- SELECT DISTINCT
+--     category,
+--     COUNT(*) AS campaign_count
+-- FROM Flat_Campaign
+-- GROUP BY category;
+
+-- SELECT COUNT(*) FROM Flat_Campaign;
+
+

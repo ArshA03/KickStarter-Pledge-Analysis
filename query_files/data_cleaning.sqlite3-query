@@ -1,4 +1,4 @@
--- database: ./kickstarter.db
+-- database: ../kickstarter.db
 
 -- database: /workspaces/KickStarter-Pledge-Analysis/kickstarter.db
 
@@ -7,6 +7,14 @@
 
 -- SELECT DISTINCT outcome
 -- FROM Campaign;
+
+
+-- (SELECT COUNT(*) - COUNT(DISTINCT id) AS Campign_dup FROM Campaign),
+-- (SELECT COUNT(*) - COUNT(DISTINCT id) AS Currency_dup FROM Currency),
+-- (SELECT COUNT(*) - COUNT(DISTINCT id) AS Country_dup FROM Country),
+-- (SELECT COUNT(*) - COUNT(DISTINCT id) AS Sub_category_dup FROM Sub_category),
+-- (SELECT COUNT(*) - COUNT(DISTINCT id) AS Category_dup FROM Category);
+
 
 -- SELECT *
 -- FROM campaign
@@ -38,16 +46,35 @@
 -- SELECT * FROM Campaign WHERE outcome = "live" AND pledged >= goal;
 
 
--- creating a new view
--- CREATE VIEW Campaign_da AS
--- SELECT id, name, sub_category_id, country_id, currency_id, launched, deadline, goal, pledged, backers,
---     CASE 
---         WHEN pledged >= goal THEN 'Successful'
---         ELSE 'Unsuccessful'
---     END AS outcome
--- FROM campaign
--- WHERE NOT outcome = 'live';
+---- Create a table for editing campaign
+-- CREATE TABLE Campaign_ed AS
+-- SELECT * FROM Campaign;
 
+
+-- SELECT *
+-- FROM Campaign_ed
+-- WHERE outcome = 'failed' AND pledged > goal;
+
+-- UPDATE Campaign_ed
+-- SET outcome = 'successful'
+-- WHERE id = 11467;
+
+-- SELECT *
+-- FROM Campaign_ed
+-- WHERE deadline > '2018-01-02 00:00:00';
+
+-- DELETE FROM Campaign_ed
+-- WHERE deadline > '2018-01-02 00:00:00';
+
+
+-- DELETE FROM Campaign_ed WHERE outcome = "live";
+
+
+-- DELETE FROM Campaign_ed WHERE outcome = "suspended";
+
+-- DELETE FROM Campaign_ed WHERE outcome = "undefined" OR outcome = "suspended";
+
+-- SELECT COUNT(*) FROM Campaign_ed;
 
 
 
@@ -99,26 +126,15 @@
 -- (14, 'JPY', 0.0067);
 
 
--- CREATE VIEW Flat_Campaign AS
--- SELECT
---     c.id AS campaign_id,
---     c.name AS campaign_name,
---     sc.name AS sub_category,
---     cat.name AS category,
---     co.name AS country,
---     cu.name AS currency,
---     c.launched,
---     c.deadline,
---     c.goal,
---     c.pledged,
---     c.backers,
---     c.outcome
--- FROM Campaign_da c
--- LEFT JOIN Sub_category sc ON c.sub_category_id = sc.id
--- LEFT JOIN Category cat ON sc.category_id = cat.id
--- LEFT JOIN Country co ON c.country_id = co.id
--- LEFT JOIN Currency cu ON c.currency_id = cu.id;
 
+-- DELETE
+-- FROM Campaign_ed
+-- WHERE backers < 1 AND pledged > 0;
+
+-- SELECT COUNT(*) FROM Campaign_ed WHERE NOT outcome = "canceled";
+
+
+-- SELECT COUNT(*) FROM Campaign_ed WHERE deadline > launched;
 
 -- CREATE VIEW Flat_Campaign AS
 -- SELECT
@@ -133,9 +149,10 @@
 --     ROUND(c.pledged * er.to_usd, 2) AS pledged_usd,
 --     c.backers,
 --     c.outcome
--- FROM Campaign_da c
+-- FROM Campaign_ed c
 -- LEFT JOIN Sub_category sc ON c.sub_category_id = sc.id
 -- LEFT JOIN Category cat ON sc.category_id = cat.id
 -- LEFT JOIN Country co ON c.country_id = co.id
 -- LEFT JOIN Currency cu ON c.currency_id = cu.id
 -- LEFT JOIN ExchangeRate er ON cu.name = er.name;
+
